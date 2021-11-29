@@ -1,0 +1,17 @@
+
+tasks:
+- init: ./mvnw package -DskipTests
+  command: java -jar target/*.jar
+
+# # exposed ports
+# # Uncomment and change accordingly if you use this starter to create an HTTP app.
+# ports:
+# - port: 8080
+#   onOpen: open-preview
+
+vscode:
+  extensions:
+    - redhat.java
+    - vscjava.vscode-java-debug
+    - vscjava.vscode-java-test
+    - pivotal.vscode-spring-boot
