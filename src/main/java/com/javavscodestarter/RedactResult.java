@@ -48,4 +48,9 @@ public class RedactResult {
       return false;
     return true;
   }
+
+  @Override
+  public String toString() {
+    return "RedactResult [numRedacted=" + numRedacted + ", redacted=" + redacted + "]";
+  }
 }
