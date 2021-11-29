@@ -2,15 +2,18 @@ package com.javavscodestarter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 public class CreditCardNumberRedactorTest {
   // Fixture source: https://stripe.com/docs/testing
-  private static final Stream<String> creditCardNumbers = Stream.of(
+  private static final List<String> creditCardNumbers = List.of(
       // Visa
       "4242424242424242",
       "4000056655665556",
@@ -39,7 +42,7 @@ public class CreditCardNumberRedactorTest {
       // UnionPay
       "6200000000000005");
 
-  private static final Stream<String> creditCardNumbersStylized = Stream.of(
+  private static final List<String> creditCardNumbersStylized = List.of(
       // Visa
       "4242 4242 4242 4242",
       "4000 0566 5566 5556",
@@ -68,16 +71,58 @@ public class CreditCardNumberRedactorTest {
       // UnionPay
       "6200 0000 0000 0005");
 
-  private static final Stream<String> allCreditCardNumbers = Stream.concat(creditCardNumbers,
-      creditCardNumbersStylized);
+  // Test fixtures must be a list because streams can't be re-used in multiple
+  // tests.
+  private static final List<String> allCreditCardNumbers = Stream
+      .concat(creditCardNumbers.stream(), creditCardNumbersStylized.stream())
+      .collect(Collectors.toList());
 
-  static Stream<Arguments> testRedactArgumentProvider() {
-    return allCreditCardNumbers.map((String cc) -> Arguments.of(cc, new RedactResult(1, "PII_CREDIT_CARD")));
+  static Stream<Arguments> testRedactSingleCcNoWhitespaceArgumentProvider() {
+    return allCreditCardNumbers.stream().map(number -> Arguments.of(number,
+        new RedactResult(1, "PII_CREDIT_CARD")));
   }
 
+  @DisplayName("Can sanitize a string that is a credit card number, reporting 1 redaction.")
   @ParameterizedTest
-  @MethodSource("testRedactArgumentProvider")
+  @MethodSource("testRedactSingleCcNoWhitespaceArgumentProvider")
   void testRedactSingleCcNoWhitespace(String src, RedactResult expected) {
+    assertEquals(expected, new CreditCardNumberRedactor(src).redact());
+  }
+
+  static Stream<Arguments> testRedactSingleCcInStringArgumentProvider() {
+    return allCreditCardNumbers.stream()
+        .map(number -> Arguments.of(" " + number + " ", new RedactResult(1, " PII_CREDIT_CARD ")));
+  }
+
+  @DisplayName("Can sanitize a string that contains a credit card number, reporting 1 redaction.")
+  @ParameterizedTest
+  @MethodSource("testRedactSingleCcInStringArgumentProvider")
+  void testRedactSingleCcInString(String src, RedactResult expected) {
+    assertEquals(expected, new CreditCardNumberRedactor(src).redact());
+  }
+
+  static Stream<Arguments> testRedactTwoCcWithSpaceArgumentProvider() {
+    return allCreditCardNumbers.stream().map(number -> Arguments.of(number + " " + number,
+        new RedactResult(2, "PII_CREDIT_CARD PII_CREDIT_CARD")));
+  }
+
+  @DisplayName("Can sanitize a string that contains multiple credit card numbers, reporting 2 redactions.")
+  @ParameterizedTest
+  @MethodSource("testRedactTwoCcWithSpaceArgumentProvider")
+  void testRedactTwoCcWithSpace(String src, RedactResult expected) {
+    assertEquals(expected, new CreditCardNumberRedactor(src).redact());
+  }
+
+  
+  static Stream<Arguments> testRedactTwoCcWithNewlineArgumentProvider() {
+    return allCreditCardNumbers.stream().map(number -> Arguments.of(number + "\n" + number,
+        new RedactResult(2, "PII_CREDIT_CARD\nPII_CREDIT_CARD")));
+  }
+
+  @DisplayName("Can sanitize a string that contains multiple credit card numbers, separated by a newline, reporting 2 redactions.")
+  @ParameterizedTest
+  @MethodSource("testRedactTwoCcWithNewlineArgumentProvider")
+  void testRedactTwoCcWithNewline(String src, RedactResult expected) {
     assertEquals(expected, new CreditCardNumberRedactor(src).redact());
   }
 }
