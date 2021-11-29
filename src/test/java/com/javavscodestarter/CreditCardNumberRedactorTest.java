@@ -39,8 +39,40 @@ public class CreditCardNumberRedactorTest {
       // UnionPay
       "6200000000000005");
 
+  private static final Stream<String> creditCardNumbersStylized = Stream.of(
+      // Visa
+      "4242 4242 4242 4242",
+      "4000 0566 5566 5556",
+
+      // Mastercard
+      "5555 5555 5555 4444",
+      "2223 0031 2200 3222",
+      "5200 8282 8282 8210",
+      "5105 1051 0510 5100",
+
+      // American Express
+      "3782 822463 10005",
+      "3782 822463 10005",
+
+      // Discover
+      "6011 1111 1111 1117",
+      "6011 0009 9013 9424",
+
+      // Diners Club
+      "3056 9300 0902 0004",
+      "3622 720627 1667",
+
+      // JCB
+      "3566 0020 2036 0505",
+
+      // UnionPay
+      "6200 0000 0000 0005");
+
+  private static final Stream<String> allCreditCardNumbers = Stream.concat(creditCardNumbers,
+      creditCardNumbersStylized);
+
   static Stream<Arguments> testRedactArgumentProvider() {
-    return creditCardNumbers.map((String cc) -> Arguments.of(cc, new RedactResult(1, "PII_CREDIT_CARD")));
+    return allCreditCardNumbers.map((String cc) -> Arguments.of(cc, new RedactResult(1, "PII_CREDIT_CARD")));
   }
 
   @ParameterizedTest
