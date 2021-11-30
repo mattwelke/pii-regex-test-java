@@ -77,9 +77,9 @@ public class CreditCardNumberRedactorTest {
       .concat(creditCardNumbers.stream(), creditCardNumbersStylized.stream())
       .collect(Collectors.toList());
 
-  static Stream<Arguments> testRedactSingleCcNoWhitespaceArgumentProvider() {
+  static List<Arguments> testRedactSingleCcNoWhitespaceArgumentProvider() {
     return allCreditCardNumbers.stream().map(number -> Arguments.of(number,
-        new RedactResult(1, "PII_CREDIT_CARD")));
+        new RedactResult(1, "PII_CREDIT_CARD"))).collect(Collectors.toList());
   }
 
   @DisplayName("Can sanitize a string that is a credit card number, reporting 1 redaction.")
@@ -89,9 +89,10 @@ public class CreditCardNumberRedactorTest {
     assertEquals(expected, new CreditCardNumberRedactor(src).redact());
   }
 
-  static Stream<Arguments> testRedactSingleCcInStringArgumentProvider() {
+  static List<Arguments> testRedactSingleCcInStringArgumentProvider() {
     return allCreditCardNumbers.stream()
-        .map(number -> Arguments.of(" " + number + " ", new RedactResult(1, " PII_CREDIT_CARD ")));
+        .map(number -> Arguments.of(" " + number + " ", new RedactResult(1, " PII_CREDIT_CARD ")))
+        .collect(Collectors.toList());
   }
 
   @DisplayName("Can sanitize a string that contains a credit card number, reporting 1 redaction.")
@@ -101,9 +102,9 @@ public class CreditCardNumberRedactorTest {
     assertEquals(expected, new CreditCardNumberRedactor(src).redact());
   }
 
-  static Stream<Arguments> testRedactTwoCcWithSpaceArgumentProvider() {
+  static List<Arguments> testRedactTwoCcWithSpaceArgumentProvider() {
     return allCreditCardNumbers.stream().map(number -> Arguments.of(number + " " + number,
-        new RedactResult(2, "PII_CREDIT_CARD PII_CREDIT_CARD")));
+        new RedactResult(2, "PII_CREDIT_CARD PII_CREDIT_CARD"))).collect(Collectors.toList());
   }
 
   @DisplayName("Can sanitize a string that contains multiple credit card numbers, reporting 2 redactions.")
@@ -113,10 +114,9 @@ public class CreditCardNumberRedactorTest {
     assertEquals(expected, new CreditCardNumberRedactor(src).redact());
   }
 
-  
-  static Stream<Arguments> testRedactTwoCcWithNewlineArgumentProvider() {
+  static List<Arguments> testRedactTwoCcWithNewlineArgumentProvider() {
     return allCreditCardNumbers.stream().map(number -> Arguments.of(number + "\n" + number,
-        new RedactResult(2, "PII_CREDIT_CARD\nPII_CREDIT_CARD")));
+        new RedactResult(2, "PII_CREDIT_CARD\nPII_CREDIT_CARD"))).collect(Collectors.toList());
   }
 
   @DisplayName("Can sanitize a string that contains multiple credit card numbers, separated by a newline, reporting 2 redactions.")
